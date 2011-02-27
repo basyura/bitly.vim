@@ -1,6 +1,6 @@
 "
-" require webapi-vim
-"
+" license and version 
+"          see readme
 "
 let s:shorten_api = 'http://api.bitly.com/v3/shorten'
 
