@@ -1,10 +1,11 @@
 
+vimscript utility for bit.ly
+
 require 
   webapi-vim https://github.com/mattn/webapi-vim
 
-
 usage
-  let info = bitly#shorten(login, apiKey, "http://google.com")
+  let info = bitly#shorten(login, apiKey, 'http://google.com')
   echo info.status_code "=> 200
   echo info.status_txt  "=> OK
   echo info.url         "=> http://bit.ly/gzJQrA
