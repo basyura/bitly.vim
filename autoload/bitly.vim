@@ -2,54 +2,83 @@
 " license and version 
 "          see readme
 "
-let s:api_shorten  = 'http://api.bitly.com/v3/shorten'
-let s:api_expand   = 'http://api.bitly.com/v3/expand'
-let s:api_validate = 'http://api.bitly.com/v3/validate'
-let s:api_clicks   = 'http://api.bitly.com/v3/clicks'
+let s:login  = 'bitlyvim'
+let s:apiKey = 'R_6f34b5ca68aed589e0368d6707f86353'
+
+let s:api_shorten          = 'http://api.bitly.com/v3/shorten'
+let s:api_expand           = 'http://api.bitly.com/v3/expand'
+let s:api_validate         = 'http://api.bitly.com/v3/validate'
+let s:api_clicks           = 'http://api.bitly.com/v3/clicks'
+let s:api_referrers        = 'http://api.bitly.com/v3/referrers'
+let s:api_countries        = 'http://api.bitly.com/v3/countries'
+let s:api_clicks_by_minute = 'http://api.bitly.com/v3/clicks_by_minute'
 "
 " get shortened url
 "
-function! bitly#shorten(login, apiKey, longUrl)
-  return 
-    \ s:flatten(s:request(
-    \ a:login, a:apiKey, s:api_shorten, {'longUrl' : a:longUrl}), 
-    \ '')[0]
+function! bitly#shorten(longUrl)
+  let xml = s:request(s:api_shorten , {'longUrl' : a:longUrl})
+  return  s:flatten(xml , '')[0]
 endfunction
 "
 " get expanded url
 "
-function! bitly#expand(login, apiKey, shortUrls)
-  return s:request_with_short_urls(a:login , a:apiKey , a:shortUrls , s:api_expand , 'entry')
+function! bitly#expand(shortUrls)
+  return s:request_with_short_urls(
+            \ a:shortUrls , s:api_expand , 'entry')
 endfunction
 "
 " get clicks status
 "
-function! bitly#clicks(login, apiKey, shortUrls)
-  return s:request_with_short_urls(a:login , a:apiKey , a:shortUrls , s:api_clicks , 'clicks')
+function! bitly#clicks(shortUrls)
+  return s:request_with_short_urls(
+            \ a:shortUrls , s:api_clicks , 'clicks')
 endfunction
+"
+" get referrers
+"
+function! bitly#referrers(shortUrl)
+  return s:request_with_short_urls(
+            \ a:shortUrl , s:api_referrers , 'referrers')
+endfunction
+"
+" get countries
+"
+function! bitly#countries(shortUrl)
+  return s:request_with_short_urls(
+            \ a:shortUrl , s:api_countries , 'countries')
+endfunction
+"
+" get clicks by minutes
+"
+"function! bitly#clicks_by_minutes(shortUrl)
+  "return s:request_with_short_urls(
+            "\ a:shortUrl , s:api_clicks_by_minute , 'clicks_by_minute')
+"endfunction
 
+
+"
 " private
 "
-function! s:request_with_short_urls(login, apiKey, shortUrls, api, node_name)
+function! s:request_with_short_urls(shortUrls, api, node_name)
+
+  let shortUrls = type(a:shortUrls)  == 1 
+                      \ ? [a:shortUrls] : a:shortUrls
   let param = []
-  for url in a:shortUrls
+  for url in shortUrls
     call add(param , 'shortUrl=' . url)
   endfor
-  return 
-    \ s:flatten(s:request(
-    \   a:login, a:apiKey, a:api , param) ,
-    \   a:node_name)
+  return s:flatten(s:request(a:api , param) , a:node_name)
 endfunction
 
-function! s:request(login, apiKey, api, param)
+function! s:request(api, param)
   let param = a:param
   if type(a:param) == 3
-    call add(param , 'login='  . a:login)
-    call add(param , 'apiKey=' . a:apiKey)
+    call add(param , 'login='  . s:login)
+    call add(param , 'apiKey=' . s:apiKey)
     call add(param , 'format=' . 'xml')
   else
-    let param.login  = a:login
-    let param.apiKey = a:apiKey
+    let param.login  = s:login
+    let param.apiKey = s:apiKey
     let param.format = 'xml'
   endif
   return xml#parse(http#get(a:api , param).content)
