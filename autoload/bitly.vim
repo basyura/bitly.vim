@@ -38,14 +38,14 @@ endfunction
 "
 function! bitly#referrers(shortUrl)
   return s:request_with_short_urls(
-            \ a:shortUrl , s:api_referrers , 'referrers')
+            \ [a:shortUrl] , s:api_referrers , 'referrers')
 endfunction
 "
 " get countries
 "
 function! bitly#countries(shortUrl)
   return s:request_with_short_urls(
-            \ a:shortUrl , s:api_countries , 'countries')
+            \ [a:shortUrl] , s:api_countries , 'countries')
 endfunction
 "
 " get clicks by minutes
@@ -67,7 +67,8 @@ function! s:request_with_short_urls(shortUrls, api, node_name)
   for url in shortUrls
     call add(param , 'shortUrl=' . url)
   endfor
-  return s:flatten(s:request(a:api , param) , a:node_name)
+  let ret = s:flatten(s:request(a:api , param) , a:node_name)
+  return type(a:shortUrls) == 1 ? ret[0] : ret
 endfunction
 
 function! s:request(api, param)

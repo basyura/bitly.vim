@@ -38,17 +38,17 @@ usage
   echo info.new_hash    "=> 1
 
   let expand = bitly#expand('http://bit.ly/fHgr3a')
-  call expand[0].status_code "=> 200
-  call expand[0].long_url    "=> http://basyura.org
-  call expand[0].short_url   "=> http://bit.ly/fHgr3a
+  call expand.status_code "=> 200
+  call expand.long_url    "=> http://basyura.org
+  call expand.short_url   "=> http://bit.ly/fHgr3a
 
-  let expand = bitly#expand(['http://bit.ly/fHgr3a' , 'http://bit.ly/g2n8tN'])
-  call expand[0].status_code "=> 200
-  call expand[0].long_url    "=> http://basyura.org
-  call expand[0].short_url   "=> http://bit.ly/fHgr3a
-  call expand[1].status_code "=> 200
-  call expand[1].long_url    "=> http://google.com
-  call expand[1].short_url   "=> http://bit.ly/g2n8tN
+  let expands = bitly#expand(['http://bit.ly/fHgr3a' , 'http://bit.ly/g2n8tN'])
+  call expands[0].status_code "=> 200
+  call expands[0].long_url    "=> http://basyura.org
+  call expands[0].short_url   "=> http://bit.ly/fHgr3a
+  call expands[1].status_code "=> 200
+  call expands[1].long_url    "=> http://google.com
+  call expands[1].short_url   "=> http://bit.ly/g2n8tN
 
   let clicks = bitly#clicks('http://bit.ly/fHgr3a')
 
