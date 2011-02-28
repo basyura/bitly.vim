@@ -25,6 +25,9 @@ vimscript utility for bit.ly
 require 
   webapi-vim https://github.com/mattn/webapi-vim
 
+api
+  http://code.google.com/p/bitly-api/wiki/ApiDocumentation
+
 usage
   let info = bitly#shorten(login, apiKey, 'http://google.com')
   echo info.status_code "=> 200
@@ -34,4 +37,30 @@ usage
   echo info.long_url    "=> http://google.com
   echo info.new_hash    "=> 1
 
+  let expand = bitly#expand('http://bit.ly/fHgr3a')
+  call expand[0].status_code "=> 200
+  call expand[0].long_url    "=> http://basyura.org
+  call expand[0].short_url   "=> http://bit.ly/fHgr3a
 
+  let expand = bitly#expand(['http://bit.ly/fHgr3a' , 'http://bit.ly/g2n8tN'])
+  call expand[0].status_code "=> 200
+  call expand[0].long_url    "=> http://basyura.org
+  call expand[0].short_url   "=> http://bit.ly/fHgr3a
+  call expand[1].status_code "=> 200
+  call expand[1].long_url    "=> http://google.com
+  call expand[1].short_url   "=> http://bit.ly/g2n8tN
+
+  let clicks = bitly#clicks('http://bit.ly/fHgr3a')
+
+  let referrers = bitly#referrers('http://bit.ly/djZ9g4')
+  for v in referrers
+    if has_key(v , 'referrer')
+      echo v.referrer . ' ' . v.clicks
+    else
+      echo v.referrer_app . ' ' . v.clicks
+    endif
+  endfor
+
+  for v in bitly#countries('http://bit.ly/djZ9g4')
+    echo v.country . ' ' . v.clicks
+  endfor
