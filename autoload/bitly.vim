@@ -8,48 +8,46 @@ let s:api_validate = 'http://api.bitly.com/v3/validate'
 
 function! bitly#shorten(login, apiKey, longUrl)
 
-  let xml = xml#parse(http#get(s:api_shorten , {
-        \ 'login'   : a:login  , 
-        \ 'apiKey'  : a:apiKey , 
-        \ 'format'  : 'xml'    , 
-        \ 'longUrl' : a:longUrl
-        \ }).content)
+  let xml = s:request(a:login , a:apiKey , s:api_shorten , 
+                       \ {'longUrl' : a:longUrl})
 
-  return {
-        \ 'status_code' : xml.find('status_code').value() ,
-        \ 'status_txt'  : xml.find('status_txt').value()  ,
-        \ 'url'         : xml.find('url').value()         ,
-        \ 'global_hash' : xml.find('global_hash').value() ,
-        \ 'long_url'    : xml.find('long_url').value()    ,
-        \ 'new_hash'    : xml.find('new_hash').value()
-        \}
+  return s:create_dict(xml , [
+              \ 'status_code' , 'status_txt' , 'url' ,
+              \ 'global_hash' , 'long_url' , 'new_hash'
+              \ ])
   
 endfunction
 
 
-function! bitly#expand(login, apiKey, short_url)
+function! bitly#expand(login, apiKey, shortUrl)
 
-  let xml = xml#parse(http#get(s:api_expand , {
-        \ 'login'     : a:login  , 
-        \ 'apiKey'    : a:apiKey , 
-        \ 'format'    : 'xml'    , 
-        \ 'shortUrl'  : a:short_url
-        \ }).content)
+  let xml = s:request(a:login , a:apiKey , s:api_expand , 
+                       \ {'shortUrl' : a:shortUrl})
 
-  return {
-        \ 'status_code' : s:find_node(xml , 'status_code') ,
-        \ 'status_txt'  : s:find_node(xml , 'status_txt')  ,
-        \ 'short_url'   : s:find_node(xml , 'short_url')   ,
-        \ 'long_url'    : s:find_node(xml , 'long_url')    ,
-        \ 'user_hash'   : s:find_node(xml , 'user_hash')   ,
-        \ 'global_hash' : s:find_node(xml , 'global_hash') ,
-        \ 'hash'        : s:find_node(xml , 'hash')        ,
-        \ 'error'       : s:find_node(xml , 'error')
-        \ }
+  return s:create_dict(xml , [
+        \ 'status_code' , 'status_txt' , 'short_url' , 'long_url'
+        \ 'user_hash' , 'global_hash' , 'hash' , 'error'
+        \ ])
   
 endfunction
 
-function! s:find_node(xml, name)
+function! s:request(login, apiKey, api, param)
+  let param = a:param
+  let param.login  = a:login
+  let param.apiKey = a:apiKey
+  let param.format = 'xml'
+  return xml#parse(http#get(a:api , param).content)
+endfunction
+
+function! s:create_dict(xml, names)
+  let map = {}
+  for name in a:names
+    let map[name] = s:find_node_value(a:xml , name)
+  endfor
+  return map
+endfunction
+
+function! s:find_node_value(xml, name)
   let child = a:xml.find(a:name)
   return has_key(child , 'value') ? child.value() : ''
 endfunction
