@@ -85,14 +85,18 @@ endfunction
 " bitly#http is a library of webapi-vim
 "
 function! s:request(api, param)
+
+  let login  = exists('g:bitly_login')   ? g:bitly_login   : s:login
+  let apiKey = exists('g:bitly_api_key') ? g:bitly_api_key : s:apiKey
+
   let param = a:param
   if type(a:param) == 3
-    call add(param , 'login='  . s:login)
-    call add(param , 'apiKey=' . s:apiKey)
+    call add(param , 'login='  . login)
+    call add(param , 'apiKey=' . apiKey)
     call add(param , 'format=' . 'xml')
   else
-    let param.login  = s:login
-    let param.apiKey = s:apiKey
+    let param.login  = login
+    let param.apiKey = apiKey
     let param.format = 'xml'
   endif
   return bitly#xml#parse(
