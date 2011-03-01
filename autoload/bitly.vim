@@ -14,6 +14,7 @@ let s:api_countries        = 'http://api.bitly.com/v3/countries'
 let s:api_clicks_by_minute = 'http://api.bitly.com/v3/clicks_by_minute'
 "
 " get shortened url
+"   a:lngUrl string
 "
 function! bitly#shorten(longUrl)
   let xml = s:request(s:api_shorten , {'longUrl' : a:longUrl})
@@ -21,6 +22,7 @@ function! bitly#shorten(longUrl)
 endfunction
 "
 " get expanded url
+"   a:shortUrls string or list
 "
 function! bitly#expand(shortUrls)
   return s:request_with_short_urls(
@@ -28,6 +30,7 @@ function! bitly#expand(shortUrls)
 endfunction
 "
 " get clicks status
+"   a:shortUrls string or list
 "
 function! bitly#clicks(shortUrls)
   return s:request_with_short_urls(
@@ -35,6 +38,7 @@ function! bitly#clicks(shortUrls)
 endfunction
 "
 " get referrers
+"   a:shortUrl string
 "
 function! bitly#referrers(shortUrl)
   return s:request_with_short_urls(
@@ -42,6 +46,7 @@ function! bitly#referrers(shortUrl)
 endfunction
 "
 " get countries
+"   a:countries string
 "
 function! bitly#countries(shortUrl)
   return s:request_with_short_urls(
@@ -56,8 +61,13 @@ endfunction
 "endfunction
 
 
+
+" private "
+
+
 "
-" private
+" the string is returns if a:shortUrls is a string.
+" the list   is returns if a:shortUrls is a list.
 "
 function! s:request_with_short_urls(shortUrls, api, node_name)
 
@@ -70,7 +80,10 @@ function! s:request_with_short_urls(shortUrls, api, node_name)
   let ret = s:flatten(s:request(a:api , param) , a:node_name)
   return type(a:shortUrls) == 1 ? ret[0] : ret
 endfunction
-
+"
+" request to server with bitly#http.
+" bitly#http is a library of webapi-vim
+"
 function! s:request(api, param)
   let param = a:param
   if type(a:param) == 3
@@ -82,13 +95,16 @@ function! s:request(api, param)
     let param.apiKey = s:apiKey
     let param.format = 'xml'
   endif
-  return xml#parse(http#get(a:api , param).content)
+  return bitly#xml#parse(
+          \ bitly#http#get(a:api , param).content)
 endfunction
-
+"
+" flatten xml to dictionary
+"
 function! s:flatten(xml, node_name)
   let status_code = a:xml.find('status_code').value()
   let status_txt  = a:xml.find('status_txt').value()
-  " 綺麗に xpath 解析したい
+  "  i want to analyze xpath beautifully.
   "  data/*
   "  data/entry/*
   let data = a:xml.find('data')
@@ -107,7 +123,10 @@ function! s:flatten(xml, node_name)
   endfor
   return list
 endfunction
-
+"
+" empty string is returns if xml has no a:name node.
+" value is returns if xml has a:name node.
+"
 function! s:find_node_value(xml, name)
   let child = a:xml.find(a:name)
   return has_key(child , 'value') ? child.value() : ''

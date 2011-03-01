@@ -22,11 +22,13 @@
 
 vimscript utility for bit.ly
 
-require 
-  webapi-vim https://github.com/mattn/webapi-vim
 
 api
   http://code.google.com/p/bitly-api/wiki/ApiDocumentation
+
+thanks 
+  webapi-vim is bundled.
+    https://github.com/mattn/webapi-vim
 
 usage
   let info = bitly#shorten(login, apiKey, 'http://google.com')
@@ -64,3 +66,5 @@ usage
   for v in bitly#countries('http://bit.ly/djZ9g4')
     echo v.country . ' ' . v.clicks
   endfor
+
+
